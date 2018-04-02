@@ -21,16 +21,18 @@ public class MovieImporter {
 		String[] genreURL = new String[21];
 		String[] movieURL = new String[50];
 		
-		String[] movieNames= new String[50]; 	//Hold titles of movies to be passed into MySQL		
-		String[] movieImg = new String[50];		//Holds image URL for movies
-		String[] movieTrailer = new String[50];	//Holds trailer for movie
-		String[] description = new String[50];	//Holds description of movie
-		String[] genres = new String[50];		//Holds LIST of genres of movies
 		String[] categories = new String[21];	//Categories of movies
 		
-		int[] year = new int[50]; 				//Year movie was made in
-		double[] rating = new double[50];		//Star rating of movie
-		int[] length = new int[50];				//Length of the movie
+		String[] movieNames= new String[50]; 	//Hold titles of movies to be passed into MySQL		
+		String[] movieImg = new String[50];		//Holds image URL for movies
+		//String[] movieTrailer = new String[50];	//Holds trailer for movie
+		String[] description = new String[50];	//Holds description of movie
+		String[] genres = new String[50];		//Holds LIST of genres of movies
+		String[] stars = new String[50];		//Star rating of movie
+		String[] rating = new String[50];		//Maturity rating of movie
+		String[] length = new String[50];		//Length of the movie
+		String[] year = new String[50]; 		//Year movie was made in
+
 		String div = "";
 		int h;
 		
@@ -62,19 +64,51 @@ public class MovieImporter {
 				for(h=0; h < movieURL.length; h++) {
 				//Connecting through movie URL to gather img, trailer, description, rating
 				doc = Jsoup.connect(movieURL[h]).get();
+				
+				//Description
 				temp = doc.select("div.summary_text");
-				for(Element sum: temp) {
-					i=0;
-					i++;
-					div = sum.text();
-					description[i-1] = div;
-					System.out.println(description[i-1]);
+				div = temp.text();
+				description[h] = div;
+				
+				//Grabbing stars
+				temp = doc.select("div.ratingValue");
+				div = temp.text();
+				stars[h] = div;
+				
+				//Rating, length, genres, year
+				temp = doc.select("div.subtext");
+				div = temp.text();
+				
+				String[] collector;
+				collector = div.split("[|()]" );
+				
+				//Noticed movies such as Vishwaroopam don't all have ratings.
+				if(!collector[0].contains("min")){ 
+				rating[h] = collector[0];
+				length[h] = collector[1];
+				genres[h] = collector[2];
+				year[h]= collector[3];
+				}
+				else {
+					rating[h] = "No Rating";
+					length[h] = collector[0];
+					genres[h] = collector[1];
+					year[h]= collector[2];
+				}
+				//movie images gathered here
+				temp = doc.select("div.poster");
+				div = temp.toString();
+				movieImg[h] = "<img src=\"" + div.substring(div.indexOf("src=\"") +5, div.indexOf("\" itemprop")) + "\">";
+				System.out.println(movieImg[h]);
+				
 				}
 				
 				
+				
+				
 				}
 				
-			}
+			
 		
 		
 		
